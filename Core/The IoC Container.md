@@ -127,4 +127,224 @@ The following example shows the basic structure of XML-based configuration metad
 
 </beans>
 ```
+- The id attribute is a string that identifies the individual bean definition.
+- The class attribute defines the type of the bean and uses the fully qualified classname.
+
+The value of the `id` attribute refers to collaborating objects. The XML for referring to collaborating objects is not shown in this example. See [Dependencies](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-dependencies) for more information.
+
+1. `id` 属性是一个字符串, 用来标识单个bean定义
+2. `class` 属性使用全类名的方式定义一个bean的类型。
+
+id属性的值引用协作对象。此示例中未显示用于引用协作对象的 XML。有关更多信息，请参见Dependencies。
+
+#### 1.2.2. Instantiating a Container (实例化一个容器)
+
+The location path or paths supplied to an `ApplicationContext` constructor are resource strings that let the container load configuration metadata from a variety of external resources, such as the local file system, the Java `CLASSPATH`, and so on.
+
+提供给 `ApplicationContext` 构造函数的一个或多个位置路径是资源字符串，允许容器从各种外部资源（例如本地文件系统、Java CLASSPATH等）加载配置元数据。
+
+```java
+ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
+```
+
+>  After you learn about Spring’s IoC container, you may want to know more about Spring’s `Resource` abstraction (as described in [Resources](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources)), which provides a convenient mechanism for reading an InputStream from locations defined in a URI syntax. In particular, `Resource` paths are used to construct applications contexts, as described in [Application Contexts and Resource Paths](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources-app-ctx).
+>
+>  在了解了 Spring 的 IoC 容器之后，您可能想了解更多关于 Spring 的 `Resource`抽象（如[参考资料中所述](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources)），它提供了一种从 URI 语法中定义的位置读取 InputStream 的便捷机制。特别是， `Resource`路径用于构造应用程序上下文，如[应用程序上下文和资源路径中所述](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources-app-ctx)。
+
+The following example shows the service layer objects `(services.xml)` configuration file:
+
+以下示例显示了服务层对象`(services.xml)`配置文件：
+
+```mxml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- services -->
+
+    <bean id="petStore" class="org.springframework.samples.jpetstore.services.PetStoreServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+        <property name="itemDao" ref="itemDao"/>
+        <!-- additional collaborators and configuration for this bean go here -->
+    </bean>
+
+    <!-- more bean definitions for services go here -->
+
+</beans>
+```
+
+In the preceding example, the service layer consists of the `PetStoreServiceImpl` class and two data access objects of the types `JpaAccountDao` and `JpaItemDao` (based on the JPA Object-Relational Mapping standard). The `property name` element refers to the name of the JavaBean property, and the `ref` element refers to the name of another bean definition. This linkage between `id` and `ref` elements expresses the dependency between collaborating objects. For details of configuring an object’s dependencies, see [Dependencies](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-dependencies).
+
+在前面的示例中，服务层由 `PetStoreServiceImpl` 类和两个类型 `JpaAccountDao` 和 `JpaItemDao`（基于 JPA 对象-关系映射标准）的数据访问对象组成。该 `property name` 元素是指 JavaBean 属性的名称，以及 `ref` 元素指的是另一个bean定义的名称。(就是id名称)`id` 和 `ref` 元素之间的这种联系表达了协作对象之间的依赖关系。有关配置对象依赖项的详细信息，请参阅 [Dependencies](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-dependencies).
+
+#####  Composing XML-based Configuration Metadata (编写基于XML的配置元数据)
+
+It can be useful to have bean definitions span multiple XML files. Often, each individual XML configuration file represents a logical layer or module in your architecture.
+
+You can use the application context constructor to load bean definitions from all these XML fragments. This constructor takes multiple `Resource` locations, as was shown in the [previous section](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-instantiation). Alternatively, use one or more occurrences of the `<import/>` element to load bean definitions from another file or files. The following example shows how to do so:
+
+让 bean 定义跨越多个 XML 文件会很有用。通常，每个单独的 XML 配置文件都代表您架构中的一个逻辑层或模块。
+
+您可以使用应用程序上下文构造函数从所有这些 XML 片段加载 bean 定义。该构造函数采用多个 `Resource` 位置，如[上一节](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-instantiation)所示 。或者，使用一个或多个 `<import/>` 元素从另一个文件或多个文件加载 bean 定义。以下示例显示了如何执行此操作：
+
+```xml
+<beans>
+    <import resource="services.xml"/>
+    <import resource="resources/messageSource.xml"/>
+    <import resource="/resources/themeSource.xml"/>
+
+    <bean id="bean1" class="..."/>
+    <bean id="bean2" class="..."/>
+</beans>
+```
+
+In the preceding example, external bean definitions are loaded from three files: `services.xml`, `messageSource.xml`, and `themeSource.xml`. All location paths are relative to the definition file doing the importing, so `services.xml` must be in the same directory or classpath location as the file doing the importing, while `messageSource.xml` and `themeSource.xml` must be in a `resources` location below the location of the importing file. As you can see, a leading slash is ignored. However, given that these paths are relative, it is better form not to use the slash at all. The contents of the files being imported, including the top level `<beans/>` element, must be valid XML bean definitions, according to the Spring Schema.
+
+在前面的例子中，外部bean定义是从这三个文件中加载： `services.xml`，`messageSource.xml`，和`themeSource.xml`。所有位置路径都相对于执行导入的定义文件(使用的是相对路径)，因此 `services.xml` 必须与执行导入的文件位于同一目录或类路径 (classpath) 位置，而 `messageSource.xml` 和 `themeSource.xml` 必须位于导入文件所在位置下方的 `resources` 位置。如您所见，前导斜杠(相对路径前的/)是被忽略的。但是，鉴于这些路径是相对的，最好根本不使用斜杠。根据 Spring Schema，被导入文件的内容，包括顶级元素`<beans/>`，必须是有效的 XML bean 定义。
+
+>  It is possible, but not recommended, to reference files in parent directories using a relative "../" path. Doing so creates a dependency on a file that is outside the current application. In particular, this reference is not recommended for `classpath:` URLs (for example, `classpath:../services.xml`), where the runtime resolution process chooses the “nearest” classpath root and then looks into its parent directory. Classpath configuration changes may lead to the choice of a different, incorrect directory.
+>
+> You can always use fully qualified resource locations instead of relative paths: for example, `file:C:/config/services.xml` or `classpath:/config/services.xml`. However, be aware that you are coupling your application’s configuration to specific absolute locations. It is generally preferable to keep an indirection for such absolute locations — for example, through "${…}" placeholders that are resolved against JVM system properties at runtime.
+>
+>  可以但不建议使用相对 “../” 路径引用父目录中的文件。这样做会为当前应用程序创建一个外部文件的依赖。特别是，不建议将此引用用于`classpath:`URL（例如，`classpath:../services.xml`）, 在这些URL中, 在解析时会选择“最近的” classpath根路径，然后查看其父目录。类路径配置更改可能会导致选择其他不正确的目录。
+>
+> 您始终可以使用绝对资源路径而不是相对路径：例如，`file:C:/config/services.xml`或`classpath:/config/services.xml`。但是，请意识到, 你正在将应用程序的配置与特定的绝对路径耦合。通常最好为这样的绝对路径保留一个间接地址——例如，使用“${… }”占位符, 在运行时根据 JVM 系统属性解析它。
+
+The namespace itself provides the import directive feature. Further configuration features beyond plain bean definitions are available in a selection of XML namespaces provided by Spring — for example, the `context` and `util` namespaces.
+
+命名空间本身提供了 `import` 指令功能。除了普通bean定义之外，Spring提供的XML名称空间中还提供了更多的配置特性——例如，`context` 和 `util` 命名空间。
+
+##### The Groovy Bean Definition DSL
+
+As a further example for externalized configuration metadata, bean definitions can also be expressed in Spring’s Groovy Bean Definition DSL, as known from the Grails framework. Typically, such configuration live in a ".groovy" file with the structure shown in the following example:
+
+作为外部化配置元数据的另一个示例，Bean定义也可以在Spring的Groovy Bean定义DSL中表达，这从Grails框架中可以知道。通常，此类配置位于一个 ".groovy"文件中，其结构如下例所示：
+
+```groovy
+beans {  
+ dataSource(BasicDataSource) {  
+ driverClassName = "org.hsqldb.jdbcDriver"  
+ url = "jdbc:hsqldb:mem:grailsDB"  
+ username = "sa"  
+ password = ""  
+ settings = \[mynew:"setting"\]  
+ }  
+ sessionFactory(SessionFactory) {  
+ dataSource = dataSource  
+ }  
+ myService(MyService) {  
+ nestedBean = { AnotherBean bean ->  
+ dataSource = dataSource  
+ }  
+ }  
+}
+```
+
+This configuration style is largely equivalent to XML bean definitions and even supports Spring’s XML configuration namespaces. It also allows for importing XML bean definition files through an `importBeans` directive.
+
+这种配置风格在很大程度上等同于XML bean定义，甚至支持Spring的XML配置命名空间。它还允许通过`importBeans` 指令导入XML bean定义文件。
+
+#### 1.2.3. Using the Container
+
+The `ApplicationContext` is the interface for an advanced factory capable of maintaining a registry of different beans and their dependencies. By using the method `T getBean(String name, Class<T> requiredType)`, you can retrieve instances of your beans.
+
+The `ApplicationContext` lets you read bean definitions and access them, as the following example shows:
+
+`ApplicationContext` 是一个高级工厂的接口，能够维护不同 bean 及其依赖项的注册表。通过使用 方法 `T getBean(String name, Class<T> requiredType)`，您可以检索 bean 的实例。
+
+将 `ApplicationContext` 允许你读bean定义和访问它们，如下例所示：
+
+```java
+// create and configure beans
+ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
+
+// retrieve configured instance
+PetStoreService service = context.getBean("petStore", PetStoreService.class);
+
+// use configured instance
+List<String> userList = service.getUsernameList();
+```
+
+With Groovy configuration, bootstrapping looks very similar. It has a different context implementation class which is Groovy-aware (but also understands XML bean definitions). The following example shows Groovy configuration:
+
+对于Groovy配置来说，它的引导方式看起来和我们之前接触的其他同类引导非常相似。它有一个与众不同且专为Groovy而设计的上下文实现类（该类同样也可以识别XML中的bean定义）。Groovy配置示例如下：
+
+```java
+ApplicationContext context = new GenericGroovyApplicationContext("services.groovy", "daos.groovy");
+```
+
+The most flexible variant is `GenericApplicationContext` in combination with reader delegates — for example, with `XmlBeanDefinitionReader` for XML files, as the following example shows:
+
+最灵活的变体是 `GenericApplicationContext` 与 reader 委托结合使用——例如，XML文件使用`XmlBeanDefinitionReader`，如下例所示:
+
+```java
+GenericApplicationContext context = new GenericApplicationContext();
+new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
+context.refresh();
+```
+
+You can also use the `GroovyBeanDefinitionReader` for Groovy files, as the following example shows:
+
+针对 `Groovy` 文件也可以使用 `GroovyBeanDefinitionReader` ，示例如下：
+
+```java
+GenericApplicationContext context = new GenericApplicationContext();
+new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
+context.refresh();
+```
+
+You can mix and match such reader delegates on the same `ApplicationContext`, reading bean definitions from diverse configuration sources.
+
+You can then use `getBean` to retrieve instances of your beans. The `ApplicationContext` interface has a few other methods for retrieving beans, but, ideally, your application code should never use them. Indeed, your application code should have no calls to the `getBean()` method at all and thus have no dependency on Spring APIs at all. For example, Spring’s integration with web frameworks provides dependency injection for various web framework components such as controllers and JSF-managed beans, letting you declare a dependency on a specific bean through metadata (such as an autowiring annotation).
+
+你可以在相同的 `ApplicationContext` 上混合匹配 `reader` 委托 ，从不同的配置源读取bean的定义。
+
+然后您可以使用它 `getBean` 来检索 bean 的实例。该`ApplicationContext` 接口有一些其他方法来检索 bean，但理想情况下，您的应用程序代码永远不应该使用它们。实际上，您的应用程序代码根本不应该调用该 `getBean()`方法，因此完全不依赖于 Spring API。例如，Spring 与 Web 框架的集成为各种 Web 框架组件（例如控制器和 JSF 管理的 bean）提供了依赖注入，让您可以通过元数据（例如 `@Autowired` 注解）声明对特定 bean 的依赖。
+
+### 1.3. Bean Overview (Bean概述)
+
+A Spring IoC container manages one or more beans. These beans are created with the configuration metadata that you supply to the container (for example, in the form of XML `<bean/>` definitions).
+
+Within the container itself, these bean definitions are represented as `BeanDefinition` objects, which contain (among other information) the following metadata:
+
+- A package-qualified class name: typically, the actual implementation class of the bean being defined.
+- Bean behavioral configuration elements, which state how the bean should behave in the container (scope, lifecycle callbacks, and so forth).
+- References to other beans that are needed for the bean to do its work. These references are also called collaborators or dependencies.
+- Other configuration settings to set in the newly created object — for example, the size limit of the pool or the number of connections to use in a bean that manages a connection pool.
+
+一个 Spring IoC 容器管理一个或多个 bean。这些 bean 是使用您提供给容器的配置元数据创建的（例如，以 XML`<bean/>`定义的形式 ）。
+
+在容器本身内，这些 bean 定义 表示为`BeanDefinition` 对象，其中包含（除其他信息外）以下元数据：
+
+- 包限定的类名：通常是定义的 bean 的实际实现类。
+- Bean 行为配置元素，它说明 Bean 在容器中的行为方式（范围、生命周期回调等）
+- 引用 bean 执行其工作所需的其他 bean 。这些引用也称为协作者或依赖项。
+- 在新创建的对象中设置的其他配置设置——例如，管理连接池的bean中要使用的连接池的大小限制或可用连接数。
+
+This metadata translates to a set of properties that make up each bean definition. The following table describes these properties:
+
+此元数据转换为组成每个 bean 定义 的一组属性。下表描述了这些属性：
+
+| Property                 | Explained in…                                                |
+| :----------------------- | :----------------------------------------------------------- |
+| Class                    | [Instantiating Beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class) |
+| Name                     | [Naming Beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-beanname) |
+| Scope                    | [Bean Scopes](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes) |
+| Constructor arguments    | [Dependency Injection](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-collaborators) |
+| Properties               | [Dependency Injection](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-collaborators) |
+| Autowiring mode          | [Autowiring Collaborators](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-autowire) |
+| Lazy initialization mode | [Lazy-initialized Beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-lazy-init) |
+| Initialization method    | [Initialization Callbacks](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-lifecycle-initializingbean) |
+| Destruction method       | [Destruction Callbacks](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-lifecycle-disposablebean) |
+
+In addition to bean definitions that contain information on how to create a specific bean, the `ApplicationContext` implementations also permit the registration of existing objects that are created outside the container (by users). This is done by accessing the ApplicationContext’s BeanFactory through the `getBeanFactory()` method, which returns the BeanFactory `DefaultListableBeanFactory` implementation. `DefaultListableBeanFactory` supports this registration through the `registerSingleton(..)` and `registerBeanDefinition(..)` methods. However, typical applications work solely with beans defined through regular bean definition metadata.
+
+除了包含有关如何创建特定 bean 的信息的 bean 定义之外，`ApplicationContext `实现还允许注册在容器外创建的现有对象。这是通过`getBeanFactory()` 方法访问 ApplicationContext 的 BeanFactory 来完成的, 该方法返回BeanFactory 的实现类 `DefaultListableBeanFactory`。`DefaultListableBeanFactory` 通过`registerSingleton(..)`和 `registerBeanDefinition(..)` 方法支持这种注册方式。但是，典型的应用程序仅使用通过常规 bean 定义的元数据定义的 bean。
+
+> Bean metadata and manually supplied singleton instances need to be registered as early as possible, in order for the container to properly reason about them during autowiring and other introspection steps. While overriding existing metadata and existing singleton instances is supported to some degree, the registration of new beans at runtime (concurrently with live access to the factory) is not officially supported and may lead to concurrent access exceptions, inconsistent state in the bean container, or both.
+>
+> Bean元数据和手动提供的单例实例需要尽早注册，以便容器在自动装配和其他自省步骤中正确地对它们进行推理。虽然在某种程度上支持覆盖现有的元数据和现有的单例实例，但是在运行时注册新bean(与对工厂的实时访问同时进行)并没有得到官方支持，并且可能导致并发访问异常、bean容器中的不一致状态，或者两者都有。
+
 
