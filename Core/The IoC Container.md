@@ -347,4 +347,18 @@ In addition to bean definitions that contain information on how to create a spec
 >
 > Bean元数据和手动提供的单例实例需要尽早注册，以便容器在自动装配和其他自省步骤中正确地对它们进行推理。虽然在某种程度上支持覆盖现有的元数据和现有的单例实例，但是在运行时注册新bean(与对工厂的实时访问同时进行)并没有得到官方支持，并且可能导致并发访问异常、bean容器中的不一致状态，或者两者都有。
 
+#### 1.3.1. Naming Beans
+
+Every bean has one or more identifiers. These identifiers must be unique within the container that hosts the bean. A bean usually has only one identifier. However, if it requires more than one, the extra ones can be considered aliases.
+
+In XML-based configuration metadata, you use the `id` attribute, the `name` attribute, or both to specify the bean identifiers. The `id` attribute lets you specify exactly one id. Conventionally, these names are alphanumeric ('myBean', 'someService', etc.), but they can contain special characters as well. If you want to introduce other aliases for the bean, you can also specify them in the `name` attribute, separated by a comma (`,`), semicolon (`;`), or white space. As a historical note, in versions prior to Spring 3.1, the `id` attribute was defined as an `xsd:ID` type, which constrained possible characters. As of 3.1, it is defined as an `xsd:string` type. Note that bean `id` uniqueness is still enforced by the container, though no longer by XML parsers.
+
+You are not required to supply a `name` or an `id` for a bean. If you do not supply a `name` or `id` explicitly, the container generates a unique name for that bean. However, if you want to refer to that bean by name, through the use of the `ref` element or a Service Locator style lookup, you must provide a name. Motivations for not supplying a name are related to using [inner beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-inner-beans) and [autowiring collaborators](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-autowire).
+
+每个 bean 都有一个或多个标识符。这些标识符在承载 bean 的容器中必须是唯一的。一个 bean 通常只有一个标识符。但是，如果它需要多个，则可以将多余的视为别名。
+
+在基于 XML 的配置元数据中，您可以使用 `id` 属性、`name` 属性或两者一起来指定 bean 标识符。该  `id` 属性允许您指定一个 ID。通常，这些名称是字母数字组成的（'myBean'、'someService' 等），但它们也可以包含特殊字符。如果要为 bean 引入其他别名，也可以在 `name` 属性中指定它们，用逗号 ( `,`)、分号 ( `;`) 或空格分隔。作为历史记录(暂时没有更合适的翻译)，在 Spring 3.1 之前的版本中，`id` 属性被定义为一种 `xsd:ID` 类型，它限制了可能的字符。从 3.1 开始，它被定义为一种 `xsd:string` 类型。请注意，bean `id` 唯一性仍然由容器强约束，但不再由 XML 解析器强约束。
+
+您不需要一定为 bean提供 `name` 或  `id`。如果您没有明确提供，则容器会为该 bean 生成一个唯一的 `name`。但是，如果您想通过 `name` 引用该 bean，通过使用`ref`元素或服务定位器样式查找，则您必须提供名称。不提供名称的动机与使用 [inner beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-inner-beans) 和 [autowiring collaborators ](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-autowire)有关.
+
 
