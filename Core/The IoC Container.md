@@ -362,3 +362,28 @@ You are not required to supply a `name` or an `id` for a bean. If you do not sup
 您不需要一定为 bean提供 `name` 或  `id`。如果您没有明确提供，则容器会为该 bean 生成一个唯一的 `name`。但是，如果您想通过 `name` 引用该 bean，通过使用`ref`元素或服务定位器样式查找，则您必须提供名称。不提供名称的动机与使用 [inner beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-inner-beans) 和 [autowiring collaborators ](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-autowire)有关.
 
 
+> Bean Naming Conventions
+
+The convention is to use the standard Java convention for instance field names when naming beans. That is, bean names start with a lowercase letter and are camel-cased from there. Examples of such names include `accountManager`, `accountService`, `userDao`, `loginController`, and so forth.
+
+Naming beans consistently makes your configuration easier to read and understand. Also, if you use Spring AOP, it helps a lot when applying advice to a set of beans related by name.
+
+Bean命名规范
+
+在命名 bean 时对实例字段名称使用标准 Java 规范。也就是说，bean 名称以小写字母开头，然后开始使用驼峰式大小写。此类名称的示例包括`accountManager`、 `accountService`、`userDao`、`loginController`等等。
+
+保持 bean命名的一致性可以使您的配置更易于阅读和理解。此外，如果您使用 Spring AOP，在应用于一组按名称相关的 bean 时使用这条建议会很有帮助。
+
+> With component scanning in the classpath, Spring generates bean names for unnamed components, following the rules described earlier: essentially, taking the simple class name and turning its initial character to lower-case. However, in the (unusual) special case when there is more than one character and both the first and second characters are upper case, the original casing gets preserved. These are the same rules as defined by `java.beans.Introspector.decapitalize` (which Spring uses here).
+>
+> 通过在类路径中扫描组件，Spring为未命名组件生成bean名称，遵循前面描述的规则: 本质上，采用简单的类名并将其初始字符转换为小写。但是，在(不常见的)特殊情况下，当有多个字符且第一个和第二个字符都是大写时，保留原来的大小写。这些规则与 `java.beans.Introspector.decapitalize` 定义的规则相同(Spring在这里使用的)。
+
+##### Aliasing a Bean outside the Bean Definition (在Bean定义之外给Bean起别名)
+
+In a bean definition itself, you can supply more than one name for the bean, by using a combination of up to one name specified by the `id` attribute and any number of other names in the `name` attribute. These names can be equivalent aliases to the same bean and are useful for some situations, such as letting each component in an application refer to a common dependency by using a bean name that is specific to that component itself.
+
+Specifying all aliases where the bean is actually defined is not always adequate, however. It is sometimes desirable to introduce an alias for a bean that is defined elsewhere. This is commonly the case in large systems where configuration is split amongst each subsystem, with each subsystem having its own set of object definitions. In XML-based configuration metadata, you can use the `<alias/>` element to accomplish this. The following example shows how to do so:
+
+在bean定义本身中，通过使用id属性指定的最多一个名称和name属性中任意数量的其他名称的组合，您可以为bean提供多个名称。这些名称可以是同一个bean的等效别名，这在某些情况下非常有用，例如通过使用特定于该组件本身的bean名称，让应用程序中的每个组件引用公共依赖项。
+
+但是，指定bean实际定义的所有别名并不总是足够的。有时需要为在其他地方定义的bean引入别名。在大型系统中很常见的一个例子是，配置拆分在每个子系统之间，每个子系统都有自己的对象定义集。在基于xml的配置元数据中，可以使用<alias/>元素来实现这一点。下面的例子展示了如何做到这一点:
