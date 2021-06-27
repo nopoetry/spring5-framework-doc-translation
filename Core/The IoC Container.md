@@ -387,3 +387,43 @@ Specifying all aliases where the bean is actually defined is not always adequate
 在bean定义本身中，通过使用id属性指定的最多一个名称和name属性中任意数量的其他名称的组合，您可以为bean提供多个名称。这些名称可以是同一个bean的等效别名，这在某些情况下非常有用，例如通过使用特定于该组件本身的bean名称，让应用程序中的每个组件引用公共依赖项。
 
 但是，指定bean实际定义的所有别名并不总是足够的。有时需要为在其他地方定义的bean引入别名。在大型系统中很常见的一个例子是，配置拆分在每个子系统之间，每个子系统都有自己的对象定义集。在基于xml的配置元数据中，可以使用<alias/>元素来实现这一点。下面的例子展示了如何做到这一点:
+In this case, a bean (in the same container) named `fromName` may also, after the use of this alias definition, be referred to as `toName`.
+
+For example, the configuration metadata for subsystem A may refer to a DataSource by the name of `subsystemA-dataSource`. The configuration metadata for subsystem B may refer to a DataSource by the name of `subsystemB-dataSource`. When composing the main application that uses both these subsystems, the main application refers to the DataSource by the name of `myApp-dataSource`. To have all three names refer to the same object, you can add the following alias definitions to the configuration metadata:
+
+```xml
+<alias name="myApp-dataSource" alias="subsystemA-dataSource"/>
+<alias name="myApp-dataSource" alias="subsystemB-dataSource"/>
+```
+
+在这种情况下, 名称为`fromName`的bean（在同一容器中）, 在使用此别名定义后也可以称为`toName`.
+
+例如，子系统A的配置元数据可以通过 `subsystemA-dataSource` 的名称引用一个数据源。子系统B的配置元数据可以通过 `subsystemB-dataSource` 的名称来引用一个数据源。当组合使用这两个子系统的主应用程序时，主应用程序通过 `myApp-dataSource` 的名称引用数据源。要让这三个名称都引用同一个对象，可以在配置元数据中添加以下别名定义:
+
+Now each component and the main application can refer to the dataSource through a name that is unique and guaranteed not to clash with any other definition (effectively creating a namespace), yet they refer to the same bean.
+
+现在，每个组件和主应用程序都可以通过一个惟一的名称来引用dataSource，这个名称保证不会与任何其他定义冲突(有效地创建了一个名称空间)，但它们引用的是同一个bean。
+
+> Java-configuration
+>
+> If you use Javaconfiguration, the `@Bean` annotation can be used to provide aliases. See [Using the `@Bean` Annotation](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-java-bean-annotation) for details.
+
+#### 1.3.2. Instantiating Beans
+
+A bean definition is essentially a recipe for creating one or more objects. The container looks at the recipe for a named bean when asked and uses the configuration metadata encapsulated by that bean definition to create (or acquire) an actual object.
+
+If you use XML-based configuration metadata, you specify the type (or class) of object that is to be instantiated in the `class` attribute of the `<bean/>` element. This `class` attribute (which, internally, is a `Class` property on a `BeanDefinition` instance) is usually mandatory. (For exceptions, see [Instantiation by Using an Instance Factory Method](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-instance-factory-method) and [Bean Definition Inheritance](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-child-bean-definitions).) You can use the `Class` property in one of two ways:
+
+- Typically, to specify the bean class to be constructed in the case where the container itself directly creates the bean by calling its constructor reflectively, somewhat equivalent to Java code with the `new` operator.
+- To specify the actual class containing the `static` factory method that is invoked to create the object, in the less common case where the container invokes a `static` factory method on a class to create the bean. The object type returned from the invocation of the `static` factory method may be the same class or another class entirely.
+
+一个bean定义本质上是创建一个或多个对象的方法。容器在被询问时查看命名bean的配方(暂时没有合适的翻译)，并使用该bean定义 封装的配置元数据创建(或获取)实际对象。
+
+如果使用基于 XML 的配置元数据，则你需要指定要在 `<bean/>`元素的class属性中实例化的对象的类型(或类), 这个 `class`属性（在内部，它是一个`BeanDefinition` 实例的`Class`属性）通常是强制性的。（对于例外情况，请参阅 [使用实例工厂方法](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-instance-factory-method)和[Bean 定义继承](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-child-bean-definitions)[进行实例化](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-instance-factory-method)。）你可以用以下两种方式之一来使用 `Class` 属性:
+
+- 通常，在容器本身通过反射调用构造函数直接创建bean的情况下，指定要构造的bean类，这在某种程度上相当于带有new操作符的Java代码。
+- 指定包含创建对象的静态工厂方法的实际类, 容器调用类上的静态工厂方法来创建bean的情况不太常见, 调用静态工厂方法返回的对象类型可以是同一个类，也可以是另一个完全相同的类。
+
+
+
+
