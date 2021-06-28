@@ -424,6 +424,46 @@ If you use XML-based configuration metadata, you specify the type (or class) of 
 - 通常，在容器本身通过反射调用构造函数直接创建bean的情况下，指定要构造的bean类，这在某种程度上相当于带有new操作符的Java代码。
 - 指定包含创建对象的静态工厂方法的实际类, 容器调用类上的静态工厂方法来创建bean的情况不太常见, 调用静态工厂方法返回的对象类型可以是同一个类，也可以是另一个完全相同的类。
 
+> Nested class names
+>
+> If you want to configure a bean definition for a nested class, you may use either the binary name or the source name of the nested class.
+>
+> For example, if you have a class called `SomeThing` in the `com.example` package, and this `SomeThing` class has a `static` nested class called `OtherThing`, they can be separated by a dollar sign (`$`) or a dot (`.`). So the value of the `class` attribute in a bean definition would be `com.example.SomeThing$OtherThing` or `com.example.SomeThing.OtherThing`.
+>
+> 嵌套类名
+>
+> 如果您想为嵌套类配置bean定义，您可以使用嵌套类的二进制名称或源名称。
+>
+> 例如，如果你在com.example包中有一个叫做SomeThing的类。这个SomeThing类有一个名为OtherThing的静态嵌套类，它们可以用美元符号($)或点(.)分隔。因此，bean定义中的class属性的值应该是`com.example.SomeThing$OtherThing` 或者 `com.example.SomeThing.OtherThing`.
+
+##### Instantiation with a Constructor (使用构造函数进行实例化)
+
+When you create a bean by the constructor approach, all normal classes are usable by and compatible with Spring. That is, the class being developed does not need to implement any specific interfaces or to be coded in a specific fashion. Simply specifying the bean class should suffice. However, depending on what type of IoC you use for that specific bean, you may need a default (empty) constructor.
+
+The Spring IoC container can manage virtually any class you want it to manage. It is not limited to managing true JavaBeans. Most Spring users prefer actual JavaBeans with only a default (no-argument) constructor and appropriate setters and getters modeled after the properties in the container. You can also have more exotic non-bean-style classes in your container. If, for example, you need to use a legacy connection pool that absolutely does not adhere to the JavaBean specification, Spring can manage it as well.
+
+With XML-based configuration metadata you can specify your bean class as follows:
+
+```xml
+<bean id="exampleBean" class="examples.ExampleBean"/>
+
+<bean name="anotherExample" class="examples.ExampleBeanTwo"/>
+```
+
+当您通过构造函数方法创建一个bean时，所有普通的类都可以被Spring使用，并且与Spring兼容。也就是说，正在开发的类不需要实现任何特定的接口，也不需要以特定的方式编码。只需指定bean类就足够了。但是，根据您为特定bean使用的IoC类型，您可能需要一个默认(空)构造函数。
+
+Spring IoC容器实际上可以管理您希望它管理的任何类。它并不局限于管理真正的Javabean。大多数Spring用户更喜欢只有默认(无参数)构造函数和根据容器中的属性适当添加的setter和getter方法的实际Javabean。您还可以在容器中添加更多非bean风格的类。例如，如果您需要使用绝对不遵守JavaBean规范的遗留连接池，Spring也可以管理它。
+
+使用基于xml的配置元数据，你可以像下边这样指定你的bean类:
+
+```xml
+<bean id="exampleBean" class="examples.ExampleBean"/>
+
+<bean name="anotherExample" class="examples.ExampleBeanTwo"/>
+```
+
+有关向构造函数提供参数（如果需要）和在构造对象后设置对象实例属性的机制的详细信息，请参阅[Injecting Dependencies](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-collaborators).
+
 
 
 
