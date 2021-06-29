@@ -465,5 +465,82 @@ Spring IoC容器实际上可以管理您希望它管理的任何类。它并不�
 有关向构造函数提供参数（如果需要）和在构造对象后设置对象实例属性的机制的详细信息，请参阅[Injecting Dependencies](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-collaborators).
 
 
+##### Instantiation by Using an Instance Factory Method (使用实例工厂方法进行实例化)
 
+Similar to instantiation through a [static factory method](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-static-factory-method), instantiation with an instance factory method invokes a non-static method of an existing bean from the container to create a new bean. To use this mechanism, leave the `class` attribute empty and, in the `factory-bean` attribute, specify the name of a bean in the current (or parent or ancestor) container that contains the instance method that is to be invoked to create the object. Set the name of the factory method itself with the `factory-method` attribute. The following example shows how to configure such a bean:
 
+与通过[静态工厂方法](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-static-factory-method)实例化类似，使用实例[工厂方法](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-static-factory-method)实例化从容器中调用现有 bean 的非静态方法来创建新 bean。要使用此机制，请将`class`属性留空，并在`factory-bean`属性中指定当前（或父或祖先）容器中 bean 的名称，该容器包含要调用来创建对象的实例方法。使用`factory-method`属性设置工厂方法本身的名称。以下示例显示了如何配置此类 bean：
+
+```xml
+<!-- the factory bean, which contains a method called createInstance() -->
+<bean id="serviceLocator" class="examples.DefaultServiceLocator">
+    <!-- inject any dependencies required by this locator bean -->
+</bean>
+
+<!-- the bean to be created via the factory bean -->
+<bean id="clientService"
+    factory-bean="serviceLocator"
+    factory-method="createClientServiceInstance"/>
+```
+
+The following example shows the corresponding class:
+
+以下示例显示了相应的类：
+
+```java
+public class DefaultServiceLocator {
+
+    private static ClientService clientService = new ClientServiceImpl();
+
+    public ClientService createClientServiceInstance() {
+        return clientService;
+    }
+}
+```
+
+One factory class can also hold more than one factory method, as the following example shows:
+
+一个工厂类也可以包含多个工厂方法，如下例所示：
+
+```xml
+<bean id="serviceLocator" class="examples.DefaultServiceLocator">
+    <!-- inject any dependencies required by this locator bean -->
+</bean>
+
+<bean id="clientService"
+    factory-bean="serviceLocator"
+    factory-method="createClientServiceInstance"/>
+
+<bean id="accountService"
+    factory-bean="serviceLocator"
+    factory-method="createAccountServiceInstance"/>
+```
+
+The following example shows the corresponding class:
+
+以下示例显示了相应的类：
+
+```java
+public class DefaultServiceLocator {
+
+    private static ClientService clientService = new ClientServiceImpl();
+
+    private static AccountService accountService = new AccountServiceImpl();
+
+    public ClientService createClientServiceInstance() {
+        return clientService;
+    }
+
+    public AccountService createAccountServiceInstance() {
+        return accountService;
+    }
+}
+```
+
+This approach shows that the factory bean itself can be managed and configured through dependency injection (DI). See [Dependencies and Configuration in Detail](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-properties-detailed).
+
+这种方法表明工厂 bean 本身可以通过依赖注入 (DI) 进行管理和配置。请参阅详细的[依赖关系和配置](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-properties-detailed)。
+
+>  In Spring documentation, "factory bean" refers to a bean that is configured in the Spring container and that creates objects through an [instance](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-instance-factory-method) or [static](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-static-factory-method) factory method. By contrast, `FactoryBean` (notice the capitalization) refers to a Spring-specific [`FactoryBean`](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-extension-factorybean) implementation class.
+>
+>  在 Spring 文档中，“factory bean”是指在 Spring 容器中配置并通过[实例](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-instance-factory-method)或 [静态](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-class-static-factory-method)工厂方法创建对象的 bean 。相比之下， `FactoryBean`（注意大写）是指特定于 Spring 的 [`FactoryBean`](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-extension-factorybean)实现类。
